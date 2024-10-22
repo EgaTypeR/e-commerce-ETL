@@ -5,7 +5,7 @@ spark = SparkSession.builder.appName('Sales-ETL').getOrCreate()
 data_path = "/sales.xlsx"  # Adjust this path to your dataset
 
 # Load the Excel file
-excel_df = spark.read.format("com.crealytics.spark.excel").option("header", "true").option("inferSchema", "true").option("dataAddress", "'Sheet1'!A1").load(data_path)
+sales_df = spark.read.csv(data_path, header=True, inferSchema=True)
 
 # Show the dataset
-excel_df.show()
+sales_df.show()
