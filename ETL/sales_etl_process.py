@@ -30,6 +30,7 @@ def create_date_dim(sales_df):
     date_dim = date_dim.withColumn("Year", year(col("Date"))) \
                        .withColumn("Month", month(col("Date"))) \
                        .withColumn("Day", dayofmonth(col("Date")))
+    date_dim = date_dim.dropDuplicates(["Date"])
     return date_dim
 
 # Create Product Dimension Table
