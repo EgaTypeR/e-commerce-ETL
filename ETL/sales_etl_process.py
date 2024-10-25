@@ -5,7 +5,7 @@ import os
 
 def create_spark_session():
     spark = SparkSession.builder \
-        .appName("Sales_ETL") \
+        .appName("Sales-ETL") \
         .config("spark.jars.packages", "org.postgresql:postgresql:42.7.4") \
         .getOrCreate()
     spark.conf.set("spark.sql.legacy.timeParserPolicy", "LEGACY")
@@ -14,7 +14,7 @@ def create_spark_session():
 # Function to convert to snake case
 def format_column(s: str):
     s = s.strip()
-    return s.lower().replace(" ", "_").replace("_", "_")
+    return s.lower().replace(" ", "_").replace("-", "_")
 
 
 def load_data(spark, path):
