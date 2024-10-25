@@ -67,7 +67,7 @@ def write_to_postgresql(df, table_name, db_url, db_user, db_password):
         .option("password", db_password) \
         .option("driver", "org.postgresql.Driver") \
         .option("ssl", "true") \
-        .mode("overwrite") \
+        .mode("append") \
         .save()
 
 def main():
