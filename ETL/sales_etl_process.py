@@ -1,5 +1,5 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import sum, year, month, dayofmonth, col
+from pyspark.sql.functions import sum, year, month, dayofmonth, col, to_date
 from dotenv import load_dotenv
 import os
 
@@ -11,11 +11,18 @@ def create_spark_session():
     return spark
 
 def load_data(spark, path):
-    sales_df = spark.read.option("header", "true").csv(path, inferSchema=True) \
-        .withColumnRenamed(" Amount ", "Amount") \
-        .withColumnRenamed("Sales Channel ", "Sales Channel")
-    sales_df = sales_df.withColumn("Date", col("Date").cast("date"))
+    sales_df = spark.read.option("header", "true").csv(path, inferSchema=True)
+
+    sales_df = sales_df.toDF(*[col_name.strip() for col_name in sales_df.columns])
+
+    sales_df = sales_df.withColumn("Date", to_date(col("Date"), "MM/dd/yyyy"))  # Adjust format based on your data
+
+    # Check for null dates
+    null_count = sales_df.filter(col("Date").isNull()).count()
+    print(f"Number of null dates after casting: {null_count}")
+
     return sales_df
+
 
 def create_date_dim(sales_df):
     date_dim = sales_df.select("Date").distinct()
