@@ -14,7 +14,7 @@ def create_spark_session():
 # Function to convert to snake case
 def format_column(s: str):
     s = s.strip()
-    return s.lower().replace(" ", "_")
+    return s.lower().replace(" ", "_").replace("-", "_")
 
 
 def load_data(spark, path):
