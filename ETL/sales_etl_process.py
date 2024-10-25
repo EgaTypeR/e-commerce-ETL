@@ -43,7 +43,7 @@ def create_product_dim(sales_df):
 
 # Create Customer Dimension Table
 def create_customer_dim(sales_df):
-    customer_dim = sales_df.select("order_id", "ship_city", "ship_state", "ship_postal_code", "ship-country").distinct()
+    customer_dim = sales_df.select("order_id", "ship_city", "ship_state", "ship_postal_code", "ship_country").distinct()
     return customer_dim
 
 # Create Shipping Dimension Table
