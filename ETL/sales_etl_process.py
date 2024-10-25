@@ -11,52 +11,54 @@ def create_spark_session():
     spark.conf.set("spark.sql.legacy.timeParserPolicy", "LEGACY")
     return spark
 
+# Function to convert to snake case
+def format_column(s: str):
+    s = s.strip()
+    return s.lower().replace(" ", "_")
+
+
 def load_data(spark, path):
     sales_df = spark.read.option("header", "true").csv(path, inferSchema=True)
 
-    sales_df = sales_df.toDF(*[col_name.strip() for col_name in sales_df.columns])
+    sales_df = sales_df.toDF(*[format_column(col_name) for col_name in sales_df.columns])
 
-    sales_df = sales_df.withColumn("Date", to_date(col("Date"), "MM/dd/yyyy"))
-
-    # Check for null dates
-    null_count = sales_df.filter(col("Date").isNull()).count()
-    print(f"Number of null dates after casting: {null_count}")
+    sales_df = sales_df.withColumn("date", to_date(col("date"), "MM/dd/yyyy"))
 
     return sales_df
 
 
 def create_date_dim(sales_df):
-    date_dim = sales_df.select("Date").distinct()
-    date_dim = date_dim.withColumn("Year", year(col("Date"))) \
-                       .withColumn("Month", month(col("Date"))) \
-                       .withColumn("Day", dayofmonth(col("Date")))
-    date_dim = date_dim.dropDuplicates(["Date"])
+    date_dim = sales_df.select("date").distinct()
+    date_dim = date_dim.withColumn("year", year(col("date"))) \
+                       .withColumn("month", month(col("date"))) \
+                       .withColumn("day", dayofmonth(col("date")))
+    date_dim = date_dim.dropDuplicates(["date"])
     return date_dim
 
 # Create Product Dimension Table
 def create_product_dim(sales_df):
-    product_dim = sales_df.select("SKU", "Style", "Category", "Size", "ASIN").distinct()
-    product_dim = product_dim.dropDuplicates(["SKU"])
+    product_dim = sales_df.select("sku", "style", "category", "size", "asin").distinct()
+    product_dim = product_dim.dropDuplicates(["sku"])
     return product_dim
 
 # Create Customer Dimension Table
 def create_customer_dim(sales_df):
-    customer_dim = sales_df.select("Order ID", "ship-city", "ship-state", "ship-postal-code", "ship-country").distinct()
+    customer_dim = sales_df.select("order_id", "ship_city", "ship_state", "ship_postal_code", "ship-country").distinct()
     return customer_dim
 
 # Create Shipping Dimension Table
 def create_shipping_dim(sales_df):
-    shipping_dim = sales_df.select("Order ID", "Fulfilment", "Sales Channel", "ship-service-level", "Courier Status").distinct()
+    shipping_dim = sales_df.select("order_id", "fulfilment", "sales-channel", "ship_service_level", "courier_status").distinct()
     return shipping_dim
 
 # Create Promotion Dimension Table
 def create_promotion_dim(sales_df):
-    promotion_dim = sales_df.select("promotion-ids").distinct()
+    promotion_dim = sales_df.select("promotion_ids").distinct()
     return promotion_dim
 
 # Create Fact Table
 def create_fact_sales(sales_df):
-    fact_sales = sales_df.select("Order ID", "Date", "SKU", "Qty", "Amount", "B2B", "fulfilled-by")
+    fact_sales = sales_df.select("order_id", "date", "sku", "qty", "amount", "b2b", "fulfilled_by")
     return fact_sales
 
 # Write DataFrame to PostgreSQL
