@@ -1,5 +1,5 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import sum, year, month, dayofmonth, col, to_date, date_format
+from pyspark.sql.functions import sum, year, month, dayofmonth, col, to_date
 from dotenv import load_dotenv
 import os
 
@@ -8,6 +8,7 @@ def create_spark_session():
         .appName("Sales-ETL") \
         .config("spark.jars.packages", "org.postgresql:postgresql:42.7.4") \
         .getOrCreate()
+    spark.conf.set("spark.sql.legacy.timeParserPolicy", "LEGACY")
     return spark
 
 def load_data(spark, path):
@@ -15,7 +16,7 @@ def load_data(spark, path):
 
     sales_df = sales_df.toDF(*[col_name.strip() for col_name in sales_df.columns])
 
-    sales_df = sales_df.withColumn("Date", to_date(date_format(col("Date"), "yyyy-MM-dd"), "yyyy-MM-dd"))
+    sales_df = sales_df.withColumn("Date", to_date(col("Date"), "MM/dd/yyyy"))
 
     # Check for null dates
     null_count = sales_df.filter(col("Date").isNull()).count()
