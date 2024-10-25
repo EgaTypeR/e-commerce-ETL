@@ -46,8 +46,7 @@ def create_promotion_dim(sales_df):
 
 # Create Fact Table
 def create_fact_sales(sales_df):
-    fact_sales = sales_df.select("Order ID", "Date", "SKU", "Qty", " Amount ", "B2B", "fulfilled-by") \
-                         .withColumnRenamed(" Amount ", "Amount")
+    fact_sales = sales_df.select("Order ID", "Date", "SKU", "Qty", " Amount", "B2B", "fulfilled-by")
     return fact_sales
 
 # Write DataFrame to PostgreSQL
