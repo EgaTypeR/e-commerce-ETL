@@ -1,5 +1,5 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import sum, year, month, dayofmonth, col, to_date
+from pyspark.sql.functions import sum, year, month, dayofmonth, col, to_date, date_format
 from dotenv import load_dotenv
 import os
 
@@ -15,7 +15,7 @@ def load_data(spark, path):
 
     sales_df = sales_df.toDF(*[col_name.strip() for col_name in sales_df.columns])
 
-    sales_df = sales_df.withColumn("Date", to_date(col("Date"), "MM/dd/yyyy"))  # Adjust format based on your data
+    sales_df = sales_df.withColumn("Date", to_date(date_format(col("Date"), "yyyy-MM-dd"), "yyyy-MM-dd"))
 
     # Check for null dates
     null_count = sales_df.filter(col("Date").isNull()).count()
