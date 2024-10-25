@@ -5,7 +5,7 @@ import os
 
 def create_spark_session():
     spark = SparkSession.builder \
-        .appName("Sales-ETL") \
+        .appName("Sales_ETL") \
         .config("spark.jars.packages", "org.postgresql:postgresql:42.7.4") \
         .getOrCreate()
     spark.conf.set("spark.sql.legacy.timeParserPolicy", "LEGACY")
@@ -14,7 +14,7 @@ def create_spark_session():
 # Function to convert to snake case
 def format_column(s: str):
     s = s.strip()
-    return s.lower().replace(" ", "_").replace("-", "_")
+    return s.lower().replace(" ", "_").replace("_", "_")
 
 
 def load_data(spark, path):
@@ -48,7 +48,7 @@ def create_customer_dim(sales_df):
 
 # Create Shipping Dimension Table
 def create_shipping_dim(sales_df):
-    shipping_dim = sales_df.select("order_id", "fulfilment", "sales-channel", "ship_service_level", "courier_status").distinct()
+    shipping_dim = sales_df.select("order_id", "fulfilment", "sales_channel", "ship_service_level", "courier_status").distinct()
     return shipping_dim
 
 # Create Promotion Dimension Table
