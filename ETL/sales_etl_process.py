@@ -35,6 +35,7 @@ def create_date_dim(sales_df):
 # Create Product Dimension Table
 def create_product_dim(sales_df):
     product_dim = sales_df.select("SKU", "Style", "Category", "Size", "ASIN").distinct()
+    product_dim = product_dim.dropDuplicates(["SKU"])
     return product_dim
 
 # Create Customer Dimension Table
