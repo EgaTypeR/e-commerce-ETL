@@ -13,7 +13,7 @@ def create_spark_session():
 def load_data(spark, path):
     sales_df = spark.read.option("header", "true").csv(path, inferSchema=True) \
         .withColumnRenamed(" Amount ", "Amount") \
-        .withColumnRenamed("Sales Channel ", "Sales_Channel")
+        .withColumnRenamed("Sales Channel ", "Sales Channel")
     sales_df = sales_df.withColumn("Date", col("Date").cast("date"))
     return sales_df
 
