@@ -11,10 +11,10 @@ def create_spark_session():
     return spark
 
 def load_data(spark, path):
-    sales_df = spark.read.option("header", "true").csv(path, inferSchema=True)
+    sales_df = spark.read.option("header", "true").csv(path, inferSchema=True) \
+        .withColumnRenamed(" Amount ", "Amount") \
+        .withColumnRenamed("Sales Channel ", "Sales_Channel")
     sales_df = sales_df.withColumn("Date", col("Date").cast("date"))
-    sales_df = sales_df.withColumn("Sales Channel ", col("Sales Channel ").cast("Sales Channel"))
-    sales_df = sales_df.withColumn(" Amount ", col(" Amount ").cast("Amount"))
     return sales_df
 
 def create_date_dim(sales_df):
