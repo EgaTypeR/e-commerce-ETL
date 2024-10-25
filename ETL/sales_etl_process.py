@@ -58,8 +58,17 @@ def create_fact_sales(sales_df):
     return fact_sales
 
 # Write DataFrame to PostgreSQL
-def write_to_postgresql(df, table_name, db_url, db_properties):
-    df.write.jdbc(url=db_url, table=table_name, mode="overwrite", properties=db_properties)
+def write_to_postgresql(df, table_name, db_url, db_user, db_password):
+    df.write \
+        .format("jdbc") \
+        .option("url", db_url) \
+        .option("dbtable", table_name) \
+        .option("user", db_user) \
+        .option("password", db_password) \
+        .option("driver", "org.postgresql.Driver") \
+        .option("ssl", "true") \
+        .mode("overwrite") \
+        .save()
 
 def main():
     load_dotenv()  # Load environment variables
@@ -68,12 +77,6 @@ def main():
     db_password = os.getenv("DB_PASSWORD")
     data_path = os.getenv("CSV_PATH")
     
-    # Database connection details
-    db_properties = {
-        "user": db_user,
-        "password": db_password,
-        "driver": "org.postgresql.Driver"
-    }
     
     # Initialize Spark session
     spark = create_spark_session()
@@ -90,12 +93,12 @@ def main():
     fact_sales = create_fact_sales(sales_df)
     
     # Write tables to PostgreSQL
-    write_to_postgresql(date_dim, "dim_date", db_url, db_properties)
-    write_to_postgresql(product_dim, "dim_product", db_url, db_properties)
-    write_to_postgresql(customer_dim, "dim_customer", db_url, db_properties)
-    write_to_postgresql(shipping_dim, "dim_shipping", db_url, db_properties)
-    write_to_postgresql(promotion_dim, "dim_promotion", db_url, db_properties)
-    write_to_postgresql(fact_sales, "fact_sales", db_url, db_properties)
+    write_to_postgresql(date_dim, "dim_date", db_url, db_user, db_password)
+    write_to_postgresql(product_dim, "dim_product", db_url, db_user, db_password)
+    write_to_postgresql(customer_dim, "dim_customer", db_url, db_user, db_password)
+    write_to_postgresql(shipping_dim, "dim_shipping", db_url, db_user, db_password)
+    write_to_postgresql(promotion_dim, "dim_promotion", db_url, db_user, db_password)
+    write_to_postgresql(fact_sales, "fact_sales", db_url, db_user, db_password)
     
     # Stop Spark session
     spark.stop()
