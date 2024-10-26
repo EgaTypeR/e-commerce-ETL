@@ -1,5 +1,6 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import sum, year, month, dayofmonth, col, to_date
+from pyspark.sql.functions import sum, year, month, dayofmonth, col, to_date, concat_ws, Window
+from pyspark.sql import functions as F
 from dotenv import load_dotenv
 import os
 
@@ -24,6 +25,8 @@ def load_data(spark, path):
 
     sales_df = sales_df.withColumn("date", to_date(col("date"), "MM/dd/yyyy"))
 
+    df = df.withColumn("order_sku_id", concat_ws("_", col("order_id"), col("sku")))
+
     return sales_df
 
 
@@ -46,9 +49,24 @@ def create_customer_dim(sales_df):
     customer_dim = sales_df.select("order_id", "ship_city", "ship_state", "ship_postal_code", "ship_country").distinct()
     return customer_dim
 
-# Create Shipping Dimension Table
 def create_shipping_dim(sales_df):
-    shipping_dim = sales_df.select("order_id", "fulfilment", "sales_channel", "ship_service_level", "courier_status").distinct()
+    # Select the relevant columns and remove duplicates
+    shipping_dim = sales_df.select(
+        "order_id", "fulfilment", "sales_channel", "ship_service_level", "courier_status"
+    )
+
+    # Define a window specification to prioritize non-cancelled entries for each Order ID
+    window = Window.partitionBy("order_id").orderBy(F.when(F.col("courier_status") == "Cancelled", 1).otherwise(0))
+
+    # Assign row numbers based on the window specification
+    shipping_dim = shipping_dim.withColumn("rank", F.row_number().over(window))
+
+    # Filter to keep only the first row for each Order ID, prioritizing non-cancelled rows
+    shipping_dim = shipping_dim.filter((F.col("rank") == 1) | (F.col("courier_status") != "Cancelled"))
+
+    # Drop the rank column after filtering
+    shipping_dim = shipping_dim.drop("rank").distinct()
+
     return shipping_dim
 
 # Create Promotion Dimension Table
