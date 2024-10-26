@@ -50,19 +50,24 @@ def create_customer_dim(sales_df):
     return customer_dim
 
 def create_shipping_dim(sales_df):
-    # Select the relevant columns and remove duplicates
-    shipping_dim = sales_df.select(
-        "order_id", "fulfilment", "sales_channel", "ship_service_level", "courier_status"
+    # Define a window specification to prioritize non-cancelled and non-NaN entries for each Order ID
+    window = Window.partitionBy("order_id").orderBy(
+        F.when(F.col("courier_status") == "Cancelled", 1)
+        .when(F.col("courier_status").isNull(), 2)
+        .otherwise(0)
     )
 
-    # Define a window specification to prioritize non-cancelled entries for each Order ID
-    window = Window.partitionBy("order_id").orderBy(F.when(F.col("courier_status") == "Cancelled", 1).otherwise(0))
-
     # Assign row numbers based on the window specification
-    shipping_dim = shipping_dim.withColumn("rank", F.row_number().over(window))
+    shipping_dim = sales_df.select(
+        "order_id", 
+        "fulfilment", 
+        "sales_channel", 
+        "ship_service_level", 
+        "courier_status"
+    ).withColumn("rank", F.row_number().over(window))
 
-    # Filter to keep only the first row for each Order ID, prioritizing non-cancelled rows
-    shipping_dim = shipping_dim.filter((F.col("rank") == 1) | (F.col("courier_status") != "Cancelled"))
+    # Filter to keep only the first row for each Order ID, prioritizing non-cancelled and non-NaN rows
+    shipping_dim = shipping_dim.filter(F.col("rank") == 1)
 
     # Drop the rank column after filtering
     shipping_dim = shipping_dim.drop("rank").distinct()
