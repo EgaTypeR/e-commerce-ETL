@@ -1,5 +1,5 @@
-from pyspark.sql import SparkSession
-from pyspark.sql.functions import sum, year, month, dayofmonth, col, to_date, concat_ws, Window
+from pyspark.sql import SparkSession, Window
+from pyspark.sql.functions import sum, year, month, dayofmonth, col, to_date, concat_ws
 from pyspark.sql import functions as F
 from dotenv import load_dotenv
 import os
