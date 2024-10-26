@@ -86,6 +86,7 @@ def create_fact_sales(sales_df):
     decimal_type = DecimalType(10, 2)
 
     fact_sales = sales_df.select(
+        "order_sku_id",
         "order_id", 
         "date", 
         "sku", 
