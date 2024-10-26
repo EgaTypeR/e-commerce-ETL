@@ -1,6 +1,7 @@
 from pyspark.sql import SparkSession, Window
 from pyspark.sql.functions import sum, year, month, dayofmonth, col, to_date, concat_ws
 from pyspark.sql import functions as F
+from pyspark.sql.type import DecimalType
 from dotenv import load_dotenv
 import os
 
@@ -81,7 +82,18 @@ def create_promotion_dim(sales_df):
 
 # Create Fact Table
 def create_fact_sales(sales_df):
-    fact_sales = sales_df.select("order_id", "date", "sku", "qty", "amount", "b2b", "fulfilled_by")
+
+    decimal_type = DecimalType(10, 2)
+
+    fact_sales = sales_df.select(
+        "order_id", 
+        "date", 
+        "sku", 
+        "qty", 
+        F.col("amount").cast(decimal_type).alias("amount"),  # Casting "amount" to DecimalType
+        "b2b", 
+        "fulfilled_by"
+    )
     return fact_sales
 
 # Write DataFrame to PostgreSQL
