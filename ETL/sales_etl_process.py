@@ -25,7 +25,7 @@ def load_data(spark, path):
 
     sales_df = sales_df.withColumn("date", to_date(col("date"), "MM/dd/yyyy"))
 
-    df = df.withColumn("order_sku_id", concat_ws("_", col("order_id"), col("sku")))
+    sales_df = sales_df.withColumn("order_sku_id", concat_ws("_", col("order_id"), col("sku")))
 
     return sales_df
 
