@@ -23,7 +23,7 @@ with DAG(
     # Task to run the PySpark ETL job
     run_etl = BashOperator(
         task_id='run_amazon_sales_etl',
-        bash_command='spark-submit /path/to/etl_job.py'  # Adjust to your script location
+        bash_command='spark-submit ../ETL/sales_etl_process.py'  # Adjust to your script location
     )
 
 run_etl
