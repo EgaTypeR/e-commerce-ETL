@@ -1,6 +1,7 @@
 from airflow import DAG
-from airflow.operators.bash import BashOperator
+from airflow.operators.python import PythonOperator
 from datetime import datetime, timedelta
+from ETL.sales_etl_process import main as run_etl_process  # Adjust the import based on your function
 
 default_args = {
     'owner': 'airflow',
@@ -15,15 +16,16 @@ with DAG(
     'sales_etl_dag',
     default_args=default_args,
     description='ETL process for Amazon Sales data with PostgreSQL',
-    schedule=timedelta(days=1),  # Changed from schedule_interval to schedule
+    schedule_interval=timedelta(days=1),
     start_date=datetime(2024, 10, 25),
     catchup=False,
 ) as dag:
 
-    # Task to run the PySpark ETL job
-    run_etl = BashOperator(
+    # Task to run the ETL job using PythonOperator
+    run_etl = PythonOperator(
         task_id='run_amazon_sales_etl',
-        bash_command='spark-submit ../ETL/sales_etl_process.py'  # Adjust to your script location
+        python_callable=run_etl_process,  # Your ETL main function
+        dag=dag
     )
 
 run_etl
