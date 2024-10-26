@@ -15,7 +15,7 @@ with DAG(
     'sales_etl_dag',
     default_args=default_args,
     description='ETL process for Amazon Sales data with PostgreSQL',
-    schedule_interval=timedelta(days=1),
+    schedule=timedelta(days=1),  # Changed from schedule_interval to schedule
     start_date=datetime(2024, 10, 25),
     catchup=False,
 ) as dag:
