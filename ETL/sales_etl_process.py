@@ -28,6 +28,8 @@ def load_data(spark, path):
 
     sales_df = sales_df.withColumn("order_sku_id", concat_ws("_", col("order_id"), col("sku")))
 
+    sales_df = sales_df.dropDuplicates(["order_sku_id"])
+
     return sales_df
 
 
